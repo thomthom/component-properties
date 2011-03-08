@@ -28,6 +28,7 @@ module TT::Plugins::CompProp
   VERSION = '1.0.0'.freeze
   PREF_KEY = 'TT_CompProp'.freeze
   
+  GLUE_NONE       = nil
   GLUE_ANY        = SnapTo_Arbitrary
   GLUE_HORIZONTAL = SnapTo_Horizontal
   GLUE_VERTICAL   = SnapTo_Vertical
@@ -48,8 +49,8 @@ module TT::Plugins::CompProp
         
         menu_glue = menu.add_submenu( 'Glue to' )
         
-          item = menu_glue.add_item( 'None' ) { self.glue_to( nil ) }
-          menu.set_validation_proc( item )  { self.proc_glue( nil ) }
+          item = menu_glue.add_item( 'None' ) { self.glue_to( GLUE_NONE ) }
+          menu.set_validation_proc( item )  { self.proc_glue( GLUE_NONE ) }
           
           item = menu_glue.add_item( 'Any' ) { self.glue_to( GLUE_ANY ) }
           menu.set_validation_proc( item )  { self.proc_glue( GLUE_ANY ) }
@@ -99,7 +100,7 @@ module TT::Plugins::CompProp
   
   def self.glue_to( type )
     b = self.selected_component.behavior
-    if type.nil?
+    if type == GLUE_NONE
       b.is2d = false
     else
       b.is2d = true
@@ -131,7 +132,7 @@ module TT::Plugins::CompProp
   
   def self.proc_glue( type )
     b = self.selected_component.behavior
-    if type.nil?
+    if type == GLUE_NONE
       if b.is2d?
         MF_UNCHECKED
       else
