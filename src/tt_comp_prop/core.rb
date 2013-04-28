@@ -104,8 +104,10 @@ module TT::Plugins::CompProp
     if type == GLUE_NONE
       b.is2d = false
     else
+      TT::Model.start_operation( 'Properties' )
       b.is2d = true
       b.snapto = type
+      Sketchup.active_model.commit_operation
     end
   end
   

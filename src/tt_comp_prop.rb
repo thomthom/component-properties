@@ -19,7 +19,7 @@ module TT
   # Plugin information
   PLUGIN_ID       = 'TT_CompProp'.freeze
   PLUGIN_NAME     = 'Component Properties'.freeze
-  PLUGIN_VERSION  = '1.1.0'.freeze
+  PLUGIN_VERSION  = '1.1.1'.freeze
   
   # Resource paths
   FILENAMESPACE = File.basename( __FILE__, '.rb' )
