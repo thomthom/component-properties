@@ -1,13 +1,4 @@
 #-------------------------------------------------------------------------------
-# Compatible: SketchUp 7 (PC)
-#             (other versions untested)
-#-------------------------------------------------------------------------------
-#
-# CHANGELOG
-# 1.0.0 - 07.03.2011
-#		 * Initial release.
-#
-#-------------------------------------------------------------------------------
 #
 # Thomas Thomassen
 # thomas[at]thomthom[dot]net
@@ -15,18 +6,33 @@
 #-------------------------------------------------------------------------------
 
 require 'sketchup.rb'
-require 'TT_Lib2/core.rb'
+begin
+  require 'TT_Lib2/core.rb'
+rescue LoadError => e
+  module TT
+    if @lib2_update.nil?
+      url = 'http://www.thomthom.net/software/sketchup/tt_lib2/errors/not-installed'
+      options = {
+        :dialog_title => 'TT_Lib² Not Installed',
+        :scrollable => false, :resizable => false, :left => 200, :top => 200
+      }
+      w = UI::WebDialog.new( options )
+      w.set_size( 500, 300 )
+      w.set_url( "#{url}?plugin=#{File.basename( __FILE__ )}" )
+      w.show
+      @lib2_update = w
+    end
+  end
+end
 
-TT::Lib.compatible?('2.0.0', 'TT Component Properties')
 
 #-------------------------------------------------------------------------------
+
+if defined?( TT::Lib ) && TT::Lib.compatible?( '2.7.0', 'Component Properties' )
 
 module TT::Plugins::CompProp
   
   ### CONSTANTS ### ------------------------------------------------------------
-  
-  VERSION = '1.0.0'.freeze
-  PREF_KEY = 'TT_CompProp'.freeze
   
   GLUE_NONE       = nil
   GLUE_ANY        = SnapTo_Arbitrary
@@ -36,11 +42,6 @@ module TT::Plugins::CompProp
   
   
   ### MENU & TOOLBARS ### ------------------------------------------------------
-  
-  #unless file_loaded?( __FILE__ )
-  #  m = TT.menu('Tools')
-  #  m.add_item('Project to Plane')  { self.project_to_plane_tool }
-  #end
   
   unless file_loaded?( __FILE__ )
     UI.add_context_menu_handler { |context_menu|
@@ -175,14 +176,42 @@ module TT::Plugins::CompProp
   end
   
   
-  ### DEBUG ### ----------------------------------------------------------------
+  ### DEBUG ### ------------------------------------------------------------  
   
-  def self.reload
+  # @note Debug method to reload the plugin.
+  #
+  # @example
+  #   TT::Plugins::CompProp.reload
+  #
+  # @param [Boolean] tt_lib Reloads TT_Lib2 if +true+.
+  #
+  # @return [Integer] Number of files reloaded.
+  # @since 1.0.0
+  def self.reload( tt_lib = false )
+    original_verbose = $VERBOSE
+    $VERBOSE = nil
+    TT::Lib.reload if tt_lib
+    # Core file (this)
     load __FILE__
+    # Supporting files
+    if defined?( PATH ) && File.exist?( PATH )
+      x = Dir.glob( File.join(PATH, '*.{rb,rbs}') ).each { |file|
+        load file
+      }
+      x.length + 1
+    else
+      1
+    end
+  ensure
+    $VERBOSE = original_verbose
   end
   
 end # module
 
+end # if TT_Lib
+
 #-------------------------------------------------------------------------------
+
 file_loaded( __FILE__ )
+
 #-------------------------------------------------------------------------------
